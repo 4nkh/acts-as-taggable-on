@@ -13,6 +13,22 @@ module ActsAsTaggableOn
 
     validates_presence_of :name
     validates_uniqueness_of :name
+    before_save :transliterate_tag_name
+
+    def transliterate(str)
+      s = Iconv.iconv('ascii//ignore//translit', 'utf-8', str).to_s
+      s.downcase!
+      s.gsub!(/'/, '')
+      s.gsub!(/[^A-Za-z0-9]+/, ' ')
+      s.strip!
+      s.gsub!(/\ +/, '-')
+      return s
+    end
+
+    def transliterate_tag_name
+      filename = (self.name).gsub('.','')
+      self.name = "#{transliterate(filename)}"
+    end
 
     ### SCOPES:
     
